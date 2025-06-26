@@ -2,6 +2,7 @@
 using ChatAppApi.Dtos;
 using ChatAppApi.Dtos.Requests;
 using ChatAppApi.Dtos.Responses;
+using ChatAppApi.Exceptions;
 using ChatAppApi.Models;
 using ChatAppApi.Repositories;
 using ChatAppApi.Utils;
@@ -41,17 +42,16 @@ namespace ChatAppApi.Services
             User? createdUser = null;
             await _transactional.RunAsync(async () =>
             {
-                bool isExists = await _userRepo.ExistsByUsername(request.Username);
-                if (isExists)
+                if (await _userRepo.ExistsByUsernameAsync(request.Username) || await _userRepo.ExistsByEmailAsync(request.Email))
                 {
-                    throw new Exception();
+                    throw new AppException(ErrorCode.UserAlreadyExists);
                 }
                 // hash password
                 string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
                 var user = _mapper.Map<User>(request);
                 user.Password = hashedPassword;
                 // add role
-                Role role = await _roleRepo.FindByNameAsync("ROLE_USER") ?? throw new Exception();
+                Role role = await _roleRepo.FindByNameAsync("ROLE_USER") ?? throw new AppException(ErrorCode.RoleNotFound);
                 user.Roles.Add(role);
                 // save
                 createdUser = await _userRepo.SaveAsync(user);

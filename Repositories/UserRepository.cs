@@ -15,9 +15,14 @@ namespace ChatAppApi.Repositories
             _context = context;
         }
 
-        public async Task<Boolean> ExistsByUsername(string username)
+        public async Task<Boolean> ExistsByUsernameAsync(string username)
         {
             return await _context.User.AnyAsync(u => u.Username == username);
+        }
+
+        public async Task<bool> ExistsByEmailAsync(string email)
+        {
+            return await _context.User.AnyAsync(u => u.Email == email);
         }
 
         public async Task<Page<User>> FindAllAsync(Pageable pageable)
@@ -41,7 +46,5 @@ namespace ChatAppApi.Repositories
             await _context.SaveChangesAsync();
             return user;
         }
-
-        
     }
 }

@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
+using ChatAppApi.Exceptions;
 
 DotNetEnv.Env.Load();
 
@@ -31,6 +32,7 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(key),
         ValidateIssuer = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidateAudience = false,
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
     };
@@ -46,6 +48,7 @@ builder.Services.AddAutoMapper(typeof(Program));
 // Add Transactional
 builder.Services.AddScoped<Transactional>();
 // Add services to the container.
+builder.Services.AddScoped<JwtUtils>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<RoleRepository>();
@@ -67,6 +70,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Add middlewares
+app.UseMiddleware<GlobalExceptionHandler>();
 
 app.MapControllers();
 

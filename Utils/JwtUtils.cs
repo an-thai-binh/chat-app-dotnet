@@ -9,10 +9,18 @@ namespace ChatAppApi.Utils
 {
     public class JwtUtils
     {
-        private static readonly string _secretKey = Env.GetString("JWT__SECRETKEY") ?? throw new Exception("JWT secret key not found");
-        private static readonly string _issuer = Env.GetString("JWT__ISSUER") ?? throw new Exception("JWT issuer not found");
+        private readonly ILogger<JwtUtils> _logger;
+        private readonly string _secretKey;
+        private readonly string _issuer;
 
-        public static string GenerateAccessToken(User user)
+        public JwtUtils(ILogger<JwtUtils> logger)
+        {
+            _logger = logger;
+            _secretKey = Env.GetString("JWT__SECRETKEY") ?? throw new Exception("JWT secret key not found");
+            _issuer = Env.GetString("JWT__ISSUER") ?? throw new Exception("JWT issuer not found");
+        }
+
+        public string GenerateAccessToken(User user)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secretKey));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -39,7 +47,7 @@ namespace ChatAppApi.Utils
             return tokenHandler.WriteToken(token);
         }
 
-        public static ClaimsPrincipal? ValidateToken(string token)
+        public ClaimsPrincipal? ValidateToken(string token)
         {
             try
             {
@@ -52,6 +60,7 @@ namespace ChatAppApi.Utils
                     IssuerSigningKey = securityKey,
                     ValidateIssuer = true,
                     ValidIssuer = _issuer,
+                    ValidateAudience = false,
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero
                 };
@@ -59,8 +68,9 @@ namespace ChatAppApi.Utils
                 SecurityToken validatedToken;
                 ClaimsPrincipal principal = tokenHandler.ValidateToken(token, validationParams, out validatedToken);
                 return principal;
-            } catch
+            } catch(Exception e)
             {
+                _logger.LogError(e, e.Message);
                 return null;
             }
         }
@@ -70,7 +80,7 @@ namespace ChatAppApi.Utils
         /// </summary>
         /// <param name="user"></param>
         /// <returns>Chuỗi scope</returns>
-        private static string BuildScope(User user)
+        private string BuildScope(User user)
         {
             StringBuilder result = new StringBuilder();
             foreach(Role role in user.Roles)
