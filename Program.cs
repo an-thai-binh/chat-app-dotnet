@@ -6,18 +6,27 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using ChatAppApi.Exceptions;
+using StackExchange.Redis;
 
 DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add Database connection
+// MySQL
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(
-        builder.Configuration.GetConnectionString("Local"),
-        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("Local"))
+        builder.Configuration.GetConnectionString("MySqlLocal"),
+        ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("MySqlLocal"))
      )
 );
+// Redis
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    string configuration = builder.Configuration.GetConnectionString("RedisLocal") ?? "";
+    return ConnectionMultiplexer.Connect(configuration);
+});
+
 // Add JWT settings and authorization
 builder.Services.AddAuthentication(options =>
 {
