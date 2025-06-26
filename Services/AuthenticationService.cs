@@ -34,9 +34,9 @@ namespace ChatAppApi.Services
             return ApiResponse<AuthenticationResponse>.CreateSuccess(authenticationResponse);
         }
 
-        public async Task<ApiResponse<object?>> Introspect(string token)
+        public async Task<ApiResponse<object?>> Introspect(UserTokenRequest request)
         {
-            ClaimsPrincipal? claimsPrincipal = _jwtUtils.ValidateToken(token) ?? throw new AppException(ErrorCode.InvalidToken);
+            ClaimsPrincipal? claimsPrincipal = _jwtUtils.ValidateToken(request.Token) ?? throw new AppException(ErrorCode.InvalidToken);
             return ApiResponse<object?>.CreateSuccess(null, "Valid token");
         }
     }

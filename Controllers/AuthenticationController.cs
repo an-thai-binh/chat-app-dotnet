@@ -25,9 +25,9 @@ namespace ChatAppApi.Controllers
         }
 
         [HttpPost("introspect")]
-        public async Task<IActionResult> Introspect([FromBody] string token)
+        public async Task<IActionResult> Introspect([FromBody] UserTokenRequest request)
         {
-            ApiResponse<object?> apiResponse = await _authService.Introspect(token);
+            ApiResponse<object?> apiResponse = await _authService.Introspect(request);
             return Ok(apiResponse);
         }
     }
