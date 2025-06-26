@@ -39,5 +39,12 @@ namespace ChatAppApi.Controllers
             ApiResponse<object?> apiResponse = await _authService.Introspect(request);
             return Ok(apiResponse);
         }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh([FromBody] UserTokenRequest request)
+        {
+            ApiResponse<AuthenticationResponse> apiResponse = await _authService.Refresh(request);
+            return Ok(apiResponse);
+        }
     }
 }

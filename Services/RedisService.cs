@@ -6,9 +6,9 @@ namespace ChatAppApi.Services
     {
         private readonly IDatabase _redis;
 
-        public RedisService(IDatabase redis)
+        public RedisService(IConnectionMultiplexer connectionMultiplexer)
         {
-            _redis = redis;
+            _redis = connectionMultiplexer.GetDatabase();
         }
 
         public async Task SetStringAsync(string key, string value, TimeSpan? expiry = null)

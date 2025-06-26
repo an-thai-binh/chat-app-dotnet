@@ -58,6 +58,7 @@ builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<Transactional>();
 // Add services to the container.
 builder.Services.AddScoped<JwtUtils>();
+builder.Services.AddScoped<RedisService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<RoleRepository>();
