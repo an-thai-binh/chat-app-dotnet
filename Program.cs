@@ -7,6 +7,8 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using ChatAppApi.Exceptions;
 using StackExchange.Redis;
+using System.IdentityModel.Tokens.Jwt;
+using ChatAppApi.Dtos;
 
 DotNetEnv.Env.Load();
 
@@ -44,6 +46,40 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = false,
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
+    };
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = async context =>
+        {
+            string? jti = context.Principal?.FindFirst(JwtRegisteredClaimNames.Jti)?.Value;
+            if (string.IsNullOrEmpty(jti))
+            {
+                context.HttpContext.Items["Error"] = "JTI not found";
+                context.Fail("JTI not found");
+                return;
+            }
+            RedisService redisService = context.HttpContext.RequestServices.GetRequiredService<RedisService>();
+            string? logout = await redisService.GetStringAsync(jti);
+            if (logout != null)
+            {
+                context.HttpContext.Items["Error"] = "This token has been revoked";
+                context.Fail("This token has been revoked");
+            }
+        },
+        OnChallenge = async context =>
+        {
+            context.HandleResponse();
+
+            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            context.Response.ContentType = "application/json";
+
+            string message = context.HttpContext.Items["Error"] as string
+                          ?? context.ErrorDescription
+                          ?? "Unauthorized";
+
+            var responseBody = ApiResponse<object?>.CreateFail(message);
+            await context.Response.WriteAsJsonAsync(responseBody);
+        }
     };
 });
 

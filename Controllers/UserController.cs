@@ -1,9 +1,8 @@
 ﻿using ChatAppApi.Dtos;
 using ChatAppApi.Dtos.Requests;
 using ChatAppApi.Dtos.Responses;
-using ChatAppApi.Models;
-using ChatAppApi.Repositories;
 using ChatAppApi.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -23,6 +22,7 @@ namespace ChatAppApi.Controllers
 
         // GET: api/<UserController>
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> Index([FromQuery] Pageable pageable)
         {
             ApiResponse<Page<UserResponse>> apiResponse = await _userService.IndexAsync(pageable);
