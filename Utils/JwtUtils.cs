@@ -1,4 +1,6 @@
-﻿using ChatAppApi.Models;
+﻿using ChatAppApi.Exceptions;
+using ChatAppApi.Models;
+using ChatAppApi.Services;
 using DotNetEnv;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,12 +14,14 @@ namespace ChatAppApi.Utils
         private readonly ILogger<JwtUtils> _logger;
         private readonly string _secretKey;
         private readonly string _issuer;
+        private readonly RedisService _redisService;
 
-        public JwtUtils(ILogger<JwtUtils> logger)
+        public JwtUtils(ILogger<JwtUtils> logger, RedisService redisService)
         {
             _logger = logger;
             _secretKey = Env.GetString("JWT__SECRETKEY") ?? throw new Exception("JWT secret key not found");
             _issuer = Env.GetString("JWT__ISSUER") ?? throw new Exception("JWT issuer not found");
+            _redisService = redisService;
         }
 
         public string GenerateAccessToken(User user)
@@ -72,7 +76,7 @@ namespace ChatAppApi.Utils
             return tokenHandler.WriteToken(token);
         }
 
-        public ClaimsPrincipal? ValidateToken(string token)
+        public async Task<ClaimsPrincipal?> ValidateToken(string token)
         {
             try
             {
@@ -92,6 +96,11 @@ namespace ChatAppApi.Utils
 
                 SecurityToken validatedToken;
                 ClaimsPrincipal principal = tokenHandler.ValidateToken(token, validationParams, out validatedToken);
+                string? logout = await _redisService.GetStringAsync(principal.FindFirst("jti")?.Value ?? "");
+                if(logout != null)
+                {
+                    return null;
+                }
                 return principal;
             } catch(Exception e)
             {
@@ -111,7 +120,7 @@ namespace ChatAppApi.Utils
             foreach(Role role in user.Roles)
             {
                 result.Append(role.Name + " ");
-                foreach(Permission permission in role.Permissions)
+                foreach(RevokatedToken permission in role.Permissions)
                 {
                     result.Append(permission.Name + " ");
                 }

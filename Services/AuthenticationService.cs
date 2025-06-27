@@ -20,6 +20,7 @@ namespace ChatAppApi.Services
             _redisService = redisService;
             _userRepo = userRepo;
         }
+
         private async Task<AuthenticationResponse> CreateAuthenticationResponseAsync(User user)
         {
             string refreshToken = _jwtUtils.GenerateRefreshToken(user);
@@ -43,9 +44,23 @@ namespace ChatAppApi.Services
             return ApiResponse<AuthenticationResponse>.CreateSuccess(authenticationResponse);
         }
 
+        public async Task<ApiResponse<object?>> Logout(UserTokenRequest request)
+        {
+            ClaimsPrincipal? claimsPrincipal = await _jwtUtils.ValidateToken(request.Token);
+            if(claimsPrincipal == null)
+            {
+                return ApiResponse<object?>.CreateSuccess(null, "Logout successful (Invalid Token)");
+            }
+            string userId = claimsPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new AppException(ErrorCode.InvalidToken);  // sub bị ánh xạ thành ClaimTypes.NameIdentifier
+            await _redisService.RemoveAsync("REFRESH_TOKEN:" + userId);
+            string jti = claimsPrincipal.FindFirst("jti")?.Value ?? throw new AppException(ErrorCode.InvalidToken);
+            await _redisService.SetStringAsync(jti, "LOGOUT", TimeSpan.FromHours(1));
+            return ApiResponse<object?>.CreateSuccess(null, "Logout successful");
+        }
+
         public async Task<ApiResponse<AuthenticationResponse>> Refresh(UserTokenRequest request)
         {
-            ClaimsPrincipal claimsPrincipal = _jwtUtils.ValidateToken(request.Token) ?? throw new AppException(ErrorCode.InvalidToken);
+            ClaimsPrincipal claimsPrincipal = await _jwtUtils.ValidateToken(request.Token) ?? throw new AppException(ErrorCode.InvalidToken);
             string type = claimsPrincipal.FindFirst("type")?.Value ?? "";
             if(type != "refresh")   // nếu không phải refresh token thì token không hợp lệ
             {
@@ -62,8 +77,9 @@ namespace ChatAppApi.Services
 
         public async Task<ApiResponse<object?>> Introspect(UserTokenRequest request)
         {
-            ClaimsPrincipal? claimsPrincipal = _jwtUtils.ValidateToken(request.Token) ?? throw new AppException(ErrorCode.InvalidToken);
+            ClaimsPrincipal? claimsPrincipal = await _jwtUtils.ValidateToken(request.Token) ?? throw new AppException(ErrorCode.InvalidToken);
             return ApiResponse<object?>.CreateSuccess(null, "Valid token");
         }
+
     }
 }

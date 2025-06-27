@@ -1,6 +1,6 @@
 ﻿namespace ChatAppApi.Models
 {
-    public class Permission
+    public class RevokatedToken
     {
         public long Id { get; set; }
         public string Name { get; set; } = default!;

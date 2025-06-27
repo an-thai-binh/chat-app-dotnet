@@ -26,6 +26,12 @@ namespace ChatAppApi.Controllers
             return Ok(apiResponse);
         }
 
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout([FromBody] UserTokenRequest request) {
+            ApiResponse<object?> apiResponse = await _authService.Logout(request);
+            return Ok(apiResponse);
+        }
+
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] UserCreationRequest request)
         {
