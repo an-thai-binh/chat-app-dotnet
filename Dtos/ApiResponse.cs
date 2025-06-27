@@ -1,9 +1,15 @@
-﻿namespace ChatAppApi.Dtos
+﻿using System.Text.Json.Serialization;
+
+namespace ChatAppApi.Dtos
 {
     public class ApiResponse<T>
     {
         public bool Success { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? Message { get; set; }
+
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public T? Data { get; set; }
 
         public static ApiResponse<T> CreateSuccess(T data, string? message = null)
