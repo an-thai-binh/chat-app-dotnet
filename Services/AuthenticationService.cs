@@ -35,7 +35,7 @@ namespace ChatAppApi.Services
 
         public async Task<ApiResponse<AuthenticationResponse>> Login(UserLoginRequest request)
         {
-            User? user = await _userRepo.FindByIdentifier(request.Identifier) ?? throw new AppException(ErrorCode.UserNotFound);
+            User? user = await _userRepo.FindByIdentifierAsync(request.Identifier) ?? throw new AppException(ErrorCode.UserNotFound);
             if (!BCrypt.Net.BCrypt.Verify(request.Password, user.Password))
             {
                 throw new AppException(ErrorCode.WrongPassword);
@@ -66,7 +66,7 @@ namespace ChatAppApi.Services
             {
                 throw new AppException(ErrorCode.InvalidToken);
             }
-            User user = await _userRepo.FindByIdentifier(claimsPrincipal.FindFirst("name")?.Value ?? "") ?? throw new AppException(ErrorCode.UserNotFound);
+            User user = await _userRepo.FindByIdentifierAsync(claimsPrincipal.FindFirst("name")?.Value ?? "") ?? throw new AppException(ErrorCode.UserNotFound);
             string storedToken = await _redisService.GetStringAsync("REFRESH_TOKEN:" + user.Id) ?? throw new AppException(ErrorCode.InvalidToken);
             if(storedToken != request.Token) {
                 throw new AppException(ErrorCode.InvalidToken);

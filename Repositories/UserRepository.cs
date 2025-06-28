@@ -32,7 +32,14 @@ namespace ChatAppApi.Repositories
             return result;
         }
 
-        public async Task<User?> FindByIdentifier(string identifer)
+
+        public async Task<User?> FindByIdAsync(string id)
+        {
+            User? user = await _context.User.FirstOrDefaultAsync(u => u.Id.ToString() == id);
+            return user;
+        }
+
+        public async Task<User?> FindByIdentifierAsync(string identifer)
         {
             return await _context.User
                 .Include(u => u.Roles)

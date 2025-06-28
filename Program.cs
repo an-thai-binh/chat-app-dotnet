@@ -1,14 +1,16 @@
+using ChatAppApi.Dtos;
+using ChatAppApi.Exceptions;
 using ChatAppApi.Repositories;
+using ChatAppApi.Requirements;
 using ChatAppApi.Services;
 using ChatAppApi.Utils;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using System.Text;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using ChatAppApi.Exceptions;
 using StackExchange.Redis;
 using System.IdentityModel.Tokens.Jwt;
-using ChatAppApi.Dtos;
+using System.Text;
 
 DotNetEnv.Env.Load();
 
@@ -28,6 +30,10 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
     string configuration = builder.Configuration.GetConnectionString("RedisLocal") ?? "";
     return ConnectionMultiplexer.Connect(configuration);
 });
+
+// Add Requirements (Filter)
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<IAuthorizationHandler, AdminOrOwnerHandler>();
 
 // Add JWT settings and authorization
 builder.Services.AddAuthentication(options =>
@@ -79,6 +85,14 @@ builder.Services.AddAuthentication(options =>
 
             var responseBody = ApiResponse<object?>.CreateFail(message);
             await context.Response.WriteAsJsonAsync(responseBody);
+        },
+        OnForbidden = async context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            context.Response.ContentType = "application/json";
+
+            var responseBody = ApiResponse<object?>.CreateFail("You do not have access to this resource");
+            await context.Response.WriteAsJsonAsync(responseBody);
         }
     };
 });
@@ -86,6 +100,8 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("ROLE_USER", policy => policy.RequireClaim("scope", "ROLE_USER"));
+    options.AddPolicy("ROLE_ADMIN", policy => policy.RequireClaim("scope", "ROLE_ADMIN"));
+    options.AddPolicy("ADMIN_OR_OWNER", policy => policy.Requirements.Add(new AdminOrOwnerRequirement()));
 });
 
 // Add AutoMapper

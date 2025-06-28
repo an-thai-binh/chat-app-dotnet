@@ -37,6 +37,13 @@ namespace ChatAppApi.Services
             return ApiResponse<Page<UserResponse>>.CreateSuccess(userResponses);
         }
 
+        public async Task<ApiResponse<UserResponse>> ShowAsync(string id)
+        {
+            User user = await _userRepo.FindByIdAsync(id) ?? throw new AppException(ErrorCode.UserNotFound);
+            UserResponse userResponse = _mapper.Map<UserResponse>(user);
+            return ApiResponse<UserResponse>.CreateSuccess(userResponse);
+        }
+
         public async Task<ApiResponse<UserResponse>> CreateAsync(UserCreationRequest request)
         {
             User? createdUser = null;
@@ -58,6 +65,7 @@ namespace ChatAppApi.Services
             });
             UserResponse userResponse = _mapper.Map<UserResponse>(createdUser);
             return ApiResponse<UserResponse>.CreateSuccess(userResponse);
-        } 
+        }
+
     }
 }

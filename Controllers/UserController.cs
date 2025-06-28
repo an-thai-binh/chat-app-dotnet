@@ -4,6 +4,7 @@ using ChatAppApi.Dtos.Responses;
 using ChatAppApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -22,7 +23,7 @@ namespace ChatAppApi.Controllers
 
         // GET: api/<UserController>
         [HttpGet]
-        [Authorize]
+        [Authorize(Policy = "ROLE_ADMIN")]
         public async Task<IActionResult> Index([FromQuery] Pageable pageable)
         {
             ApiResponse<Page<UserResponse>> apiResponse = await _userService.IndexAsync(pageable);
@@ -31,14 +32,16 @@ namespace ChatAppApi.Controllers
 
         // GET api/<UserController>/5
         [HttpGet("{id}")]
-        public string Get(int id)
+        [Authorize(Policy = "ADMIN_OR_OWNER")]
+        public async Task<IActionResult> Show(string id)
         {
-            return "value";
+            ApiResponse<UserResponse> apiResponse = await _userService.ShowAsync(id);
+            return Ok(apiResponse);
         }
 
         // POST api/<UserController>
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] UserCreationRequest request)
+        public async Task<IActionResult> Create([FromBody] UserCreationRequest request)
         {
             ApiResponse<UserResponse> apiResponse = await _userService.CreateAsync(request);
             return StatusCode(201, apiResponse);
