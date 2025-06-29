@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace ChatAppApi.Models.Configurations
 {
-    public class PermissionConfiguration : IEntityTypeConfiguration<RevokatedToken>
+    public class PermissionConfiguration : IEntityTypeConfiguration<Permission>
     {
-        public void Configure(EntityTypeBuilder<RevokatedToken> builder)
+        public void Configure(EntityTypeBuilder<Permission> builder)
         {
             builder.HasKey(o => o.Id);
 

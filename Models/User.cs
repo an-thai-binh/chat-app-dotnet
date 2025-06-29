@@ -10,5 +10,7 @@
         public bool IsFemale { get; set; }
         public DateTime BirthDate { get; set; }
         public List<Role> Roles { get; set; } = new();
+        public List<Friendship> FriendSent { get; set; } = new();
+        public List<Friendship> FriendReceived { get; set; } = new();
     } 
 }

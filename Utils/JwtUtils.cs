@@ -120,7 +120,7 @@ namespace ChatAppApi.Utils
             foreach(Role role in user.Roles)
             {
                 result.Append(role.Name + " ");
-                foreach(RevokatedToken permission in role.Permissions)
+                foreach(Permission permission in role.Permissions)
                 {
                     result.Append(permission.Name + " ");
                 }

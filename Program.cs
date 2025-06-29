@@ -1,5 +1,6 @@
-using ChatAppApi.Dtos;
+﻿using ChatAppApi.Dtos;
 using ChatAppApi.Exceptions;
+using ChatAppApi.Hubs;
 using ChatAppApi.Repositories;
 using ChatAppApi.Requirements;
 using ChatAppApi.Services;
@@ -55,6 +56,19 @@ builder.Services.AddAuthentication(options =>
     };
     options.Events = new JwtBearerEvents
     {
+        // trước khi validate token (dùng để lấy token từ 1 nơi nào đó, áp dụng cho toàn bộ request)
+        OnMessageReceived = context =>
+        {
+            string? accessToken = context.Request.Query["access_token"];
+            PathString path = context.HttpContext.Request.Path;
+            // chỉ áp dụng cho websocket, lấy token từ query string (mặc định là từ header)
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/applicationHub"))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;  // nếu không có [Authorize] thì không thực hiện validate
+        },
+        // sau khi token validate thành công
         OnTokenValidated = async context =>
         {
             string? jti = context.Principal?.FindFirst(JwtRegisteredClaimNames.Jti)?.Value;
@@ -72,6 +86,25 @@ builder.Services.AddAuthentication(options =>
                 context.Fail("This token has been revoked");
             }
         },
+        // sau khi token validate thành công như không có quyền truy cập vào tài nguyên
+        OnForbidden = async context =>
+        {
+            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+            context.Response.ContentType = "application/json";
+
+            var responseBody = ApiResponse<object?>.CreateFail("You do not have access to this resource");
+            await context.Response.WriteAsJsonAsync(responseBody);
+        },
+        // sau khi token validate thất bại
+        OnAuthenticationFailed = context =>
+        {
+            context.NoResult();
+            ILogger? logger = context.HttpContext.RequestServices.GetService<ILogger<JwtBearerEvents>>();
+            logger?.LogWarning(context.Exception, "JWT authentication failed");
+            context.HttpContext.Items["Error"] = "Invalid token";
+            return Task.CompletedTask;
+        },
+        // sau OnAuthenticationFailed
         OnChallenge = async context =>
         {
             context.HandleResponse();
@@ -84,14 +117,6 @@ builder.Services.AddAuthentication(options =>
                           ?? "Unauthorized";
 
             var responseBody = ApiResponse<object?>.CreateFail(message);
-            await context.Response.WriteAsJsonAsync(responseBody);
-        },
-        OnForbidden = async context =>
-        {
-            context.Response.StatusCode = StatusCodes.Status403Forbidden;
-            context.Response.ContentType = "application/json";
-
-            var responseBody = ApiResponse<object?>.CreateFail("You do not have access to this resource");
             await context.Response.WriteAsJsonAsync(responseBody);
         }
     };
@@ -108,6 +133,8 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddAutoMapper(typeof(Program));
 // Add Transactional
 builder.Services.AddScoped<Transactional>();
+// Add SignalR
+builder.Services.AddSignalR();
 // Add services to the container.
 builder.Services.AddScoped<JwtUtils>();
 builder.Services.AddScoped<RedisService>();
@@ -115,6 +142,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<RoleRepository>();
 builder.Services.AddScoped<AuthenticationService>();
+builder.Services.AddScoped<FriendshipService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -137,5 +165,8 @@ app.UseAuthorization();
 app.UseMiddleware<GlobalExceptionHandler>();
 
 app.MapControllers();
+
+// Add Hub (Websocket - SignalR)
+app.MapHub<ApplicationHub>("/applicationHub");
 
 app.Run();

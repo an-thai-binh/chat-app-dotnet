@@ -5,6 +5,6 @@
         public long Id { get; set; }
         public string Name { get; set; } = default!;
         public List<User> Users { get; set; } = new();
-        public List<RevokatedToken> Permissions { get; set; } = new();
+        public List<Permission> Permissions { get; set; } = new();
     }
 }
