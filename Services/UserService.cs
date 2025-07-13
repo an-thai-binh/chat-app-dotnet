@@ -53,10 +53,17 @@ namespace ChatAppApi.Services
                 {
                     throw new AppException(ErrorCode.UserAlreadyExists);
                 }
+                // check match password
+                if(request.ConfirmPassword != request.Password)
+                {
+                    throw new AppException(ErrorCode.PasswordNotMatch);
+                }
                 // hash password
                 string hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
                 var user = _mapper.Map<User>(request);
                 user.Password = hashedPassword;
+                // default display name
+                user.DisplayName = request.Username;
                 // add role
                 Role role = await _roleRepo.FindByNameAsync("ROLE_USER") ?? throw new AppException(ErrorCode.RoleNotFound);
                 user.Roles.Add(role);

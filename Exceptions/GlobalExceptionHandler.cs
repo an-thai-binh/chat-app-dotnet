@@ -28,8 +28,11 @@ namespace ChatAppApi.Exceptions
                 response.ContentType = "application/json";
                 response.StatusCode = errorCode.StatusCode;
                 var apiResponse = ApiResponse<object?>.CreateFail(errorCode.Message);
-                string responseBody = JsonSerializer.Serialize(apiResponse);
-
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                };
+                string responseBody = JsonSerializer.Serialize(apiResponse, options);
                 await response.WriteAsync(responseBody);
             } catch(Exception e)
             {
@@ -39,8 +42,11 @@ namespace ChatAppApi.Exceptions
                 response.ContentType = "application/json";
                 response.StatusCode = StatusCodes.Status500InternalServerError;
                 var apiResponse = ApiResponse<object?>.CreateFail(e.Message);
-                string responseBody = JsonSerializer.Serialize(apiResponse);
-
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                };
+                string responseBody = JsonSerializer.Serialize(apiResponse, options);
                 await response.WriteAsync(responseBody);
             }
         }
