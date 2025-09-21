@@ -13,6 +13,7 @@ using StackExchange.Redis;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
+// Load .env file
 DotNetEnv.Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
@@ -86,7 +87,7 @@ builder.Services.AddAuthentication(options =>
                 context.Fail("This token has been revoked");
             }
         },
-        // sau khi token validate thành công như không có quyền truy cập vào tài nguyên
+        // sau khi token validate thành công nhưng không có quyền truy cập vào tài nguyên
         OnForbidden = async context =>
         {
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
@@ -143,6 +144,7 @@ builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<RoleRepository>();
 builder.Services.AddScoped<AuthenticationService>();
 builder.Services.AddScoped<FriendshipService>();
+builder.Services.AddScoped<FriendshipRepository>();
 
 // Cors
 builder.Services.AddCors(options =>

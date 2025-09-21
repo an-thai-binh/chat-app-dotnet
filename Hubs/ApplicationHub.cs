@@ -14,12 +14,12 @@ namespace ChatAppApi.Hubs
 
         public async Task SendFriendRequest(string toId)
         {
-            await _fsService.SendFriendRequestAsync(Context.UserIdentifier, toId);
+            await _fsService.SendFriendRequestAsync(Context.UserIdentifier ?? "", toId);
         }
 
         public async Task AcceptFriendRequest(string fromId)
         {
-            await _fsService.AcceptFriendRequestAsync(fromId, Context.UserIdentifier);
+            await _fsService.AcceptFriendRequestAsync(fromId, Context.UserIdentifier ?? "");
         }
 
         public override Task OnConnectedAsync()

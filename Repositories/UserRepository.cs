@@ -15,7 +15,7 @@ namespace ChatAppApi.Repositories
             _context = context;
         }
 
-        public async Task<Boolean> ExistsByUsernameAsync(string username)
+        public async Task<bool> ExistsByUsernameAsync(string username)
         {
             return await _context.User.AnyAsync(u => u.Username == username);
         }
@@ -39,12 +39,12 @@ namespace ChatAppApi.Repositories
             return user;
         }
 
-        public async Task<User?> FindByIdentifierAsync(string identifer)
+        public async Task<User?> FindByIdentifierAsync(string identifier)
         {
             return await _context.User
                 .Include(u => u.Roles)
                 .ThenInclude(r => r.Permissions)
-                .FirstOrDefaultAsync(u => u.Username == identifer || u.Email == identifer);
+                .FirstOrDefaultAsync(u => u.Username == identifier || u.Email == identifier);
         }
 
         public async Task<User> SaveAsync(User user)

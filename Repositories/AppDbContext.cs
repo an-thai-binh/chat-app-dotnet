@@ -13,6 +13,7 @@ namespace ChatAppApi.Repositories
         public DbSet<User> User { get; set; }
         public DbSet<Role> Role { get; set; }
         public DbSet<Permission> Permission { get; set; }
+        public DbSet<Friendship> Friendship { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
