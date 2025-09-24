@@ -125,7 +125,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("ROLE_USER", policy => policy.RequireClaim("scope", "ROLE_USER"));
+    options.AddPolicy("ROLE_USER", policy => policy.RequireClaim("scope", "ROLE_USER", "ROLE_ADMIN"));
     options.AddPolicy("ROLE_ADMIN", policy => policy.RequireClaim("scope", "ROLE_ADMIN"));
     options.AddPolicy("ADMIN_OR_OWNER", policy => policy.Requirements.Add(new AdminOrOwnerRequirement()));
 });

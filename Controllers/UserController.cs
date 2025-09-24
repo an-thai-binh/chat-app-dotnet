@@ -4,6 +4,7 @@ using ChatAppApi.Dtos.Responses;
 using ChatAppApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -36,6 +37,20 @@ namespace ChatAppApi.Controllers
         public async Task<IActionResult> Show(string id)
         {
             ApiResponse<UserResponse> apiResponse = await _userService.ShowAsync(id);
+            return Ok(apiResponse);
+        }
+
+        /// <summary>
+        /// Tìm kiếm người dùng trong chế độ bạn bè
+        /// </summary>
+        /// <param name="query">username</param>
+        /// <returns>Người dùng tìm thấy</returns>
+        [HttpGet("searchUserInFriend")]
+        [Authorize(Policy = "ROLE_USER")]
+        public async Task<IActionResult> SearchUserInFriend([FromQuery] string query)
+        {
+            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? ""; // get sub
+            ApiResponse<UserFriendSearchResponse> apiResponse = await _userService.SearchUserInFriendAsync(userId, query);
             return Ok(apiResponse);
         }
 
