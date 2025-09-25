@@ -54,15 +54,21 @@ namespace ChatAppApi.Services
             User foundUser = await _userRepo.FindByIdentifierAsync(query) ?? throw new AppException(ErrorCode.UserNotFound);
             Friendship? friendship = await _fsRepo.FindByUserAndFriendAsync(user, foundUser);
             String friendStatus = "NONE";
+            Boolean isSender = false;
             if(friendship != null)
             {
                 friendStatus = friendship.Status;
+                if(friendship.User.Id.ToString() == userId)
+                {
+                    isSender = true;
+                }
             }
             UserFriendSearchResponse response = new UserFriendSearchResponse
             {
                 Id = foundUser.Id,
                 Username = foundUser.Username,
-                FriendStatus = friendStatus
+                FriendStatus = friendStatus,
+                IsSender = isSender
             };
             return ApiResponse<UserFriendSearchResponse>.CreateSuccess(response);
         }

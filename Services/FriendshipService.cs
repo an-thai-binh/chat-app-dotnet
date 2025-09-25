@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using ChatAppApi.Dtos;
 using ChatAppApi.Dtos.Responses;
+using ChatAppApi.Exceptions;
 using ChatAppApi.Hubs;
 using ChatAppApi.Models;
 using ChatAppApi.Repositories;
@@ -23,6 +25,14 @@ namespace ChatAppApi.Services
             _fsRepo = fsRepo;
             _userRepo = userRepo;
         }
+
+        public async Task<ApiResponse<List<FriendRequestResponse>>> GetFriendRequestsAsync(string userId)
+        {
+            User user = await _userRepo.FindByIdAsync(userId) ?? throw new AppException(ErrorCode.UserNotFound);
+            List<Friendship> friendships = await _fsRepo.FindFriendRequestByUser(user);
+            List<FriendRequestResponse> responses = _mapper.Map<List<FriendRequestResponse>>(friendships);
+            return ApiResponse<List<FriendRequestResponse>>.CreateSuccess(responses);
+        } 
 
         public async Task SendFriendRequestAsync(string fromId, string toId)
         {

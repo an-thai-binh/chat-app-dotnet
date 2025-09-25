@@ -21,6 +21,15 @@ namespace ChatAppApi.Repositories
             return await _context.Friendship.FirstOrDefaultAsync(f => f.User == sender && f.Friend == receiver);
         }
 
+        public async Task<List<Friendship>> FindFriendRequestByUser(User user)
+        {
+            return await _context.Friendship
+                .Include(f => f.User)
+                .Include(f => f.Friend)
+                .Where(f => f.Friend == user && f.Status == "PENDING")
+                .ToListAsync();
+        }
+
         public async Task<Friendship> SaveAsync(Friendship friendship)
         {
             _context.Friendship.Add(friendship);
