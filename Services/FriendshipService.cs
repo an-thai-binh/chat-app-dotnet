@@ -55,10 +55,28 @@ namespace ChatAppApi.Services
                 Status = "PENDING",
                 CreatedAt = DateTime.Now
             };
-            await _fsRepo.SaveAsync(friendship);
-            UserResponse userResponse = _mapper.Map<UserResponse>(sender);
+            friendship = await _fsRepo.SaveAsync(friendship);
             await _hubContext.Clients.User(fromId).SendAsync("SendFriendRequestStatus", true);
-            await _hubContext.Clients.User(toId).SendAsync("SendFriendRequest", userResponse);   // gửi thông tin người gửi lời kết bạn đến cho người nhận
+            await _hubContext.Clients.User(toId).SendAsync("SendFriendRequest", friendship);   // gửi thông tin người gửi lời kết bạn đến cho người nhận
+        }
+
+        public async Task CancelFriendRequestAsync(string fromId, string toId)
+        {
+            User? sender = await _userRepo.FindByIdAsync(fromId);
+            if (sender == null)
+            {
+                _logger.LogWarning("AcceptFriendRequest Failed: Sender not found");
+                return;
+            }
+            User? receiver = await _userRepo.FindByIdAsync(toId);
+            if (receiver == null)
+            {
+                _logger.LogWarning("AcceptFriendRequest Failed: Receiver not found");
+                return;
+            }
+            await _fsRepo.DeleteByUserAndFriendAsync(sender, receiver);
+            await _hubContext.Clients.User(fromId).SendAsync("CancelFriendRequestStatus", toId);
+            await _hubContext.Clients.User(toId).SendAsync("CancelFriendRequest", fromId);
         }
 
         public async Task AcceptFriendRequestAsync(string fromId, string toId)

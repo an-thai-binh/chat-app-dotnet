@@ -43,5 +43,15 @@ namespace ChatAppApi.Repositories
             await _context.SaveChangesAsync();
             return friendship;
         }
+
+        public async Task DeleteByUserAndFriendAsync(User user, User friend)
+        {
+            Friendship? friendship = await _context.Friendship.FirstOrDefaultAsync(f => f.User == user && f.Friend == friend);
+            if(friendship != null)
+            {
+                _context.Friendship.Remove(friendship);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }
