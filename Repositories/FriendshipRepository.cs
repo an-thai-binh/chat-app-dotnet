@@ -18,7 +18,8 @@ namespace ChatAppApi.Repositories
         }
         public async Task<Friendship?> FindByUserAndFriendAsync(User sender, User receiver)
         {
-            return await _context.Friendship.FirstOrDefaultAsync(f => f.User == sender && f.Friend == receiver);
+            return await _context.Friendship.FirstOrDefaultAsync(f => (f.User == sender && f.Friend == receiver) 
+                                                                   || (f.User == receiver && f.Friend == sender));
         }
 
         public async Task<List<Friendship>> FindFriendRequestByUser(User user)

@@ -36,6 +36,7 @@ namespace ChatAppApi.Services
 
         public async Task SendFriendRequestAsync(string fromId, string toId)
         {
+            if (fromId == toId) throw new AppException(ErrorCode.SelfActionNotAllowed);
             User? sender = await _userRepo.FindByIdAsync(fromId);
             if(sender == null)
             {
@@ -62,6 +63,7 @@ namespace ChatAppApi.Services
 
         public async Task CancelFriendRequestAsync(string fromId, string toId)
         {
+            if (fromId == toId) throw new AppException(ErrorCode.SelfActionNotAllowed);
             User? sender = await _userRepo.FindByIdAsync(fromId);
             if (sender == null)
             {
@@ -81,6 +83,7 @@ namespace ChatAppApi.Services
 
         public async Task AcceptFriendRequestAsync(string fromId, string toId)
         {
+            if (fromId == toId) throw new AppException(ErrorCode.SelfActionNotAllowed);
             User? sender = await _userRepo.FindByIdAsync(fromId);
             if (sender == null)
             {
