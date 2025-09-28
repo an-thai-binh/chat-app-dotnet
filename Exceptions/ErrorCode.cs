@@ -2,6 +2,7 @@
 {
     public class ErrorCode
     {
+        public static readonly ErrorCode InvalidParameters= new("Invalid parameter(s)", StatusCodes.Status400BadRequest);
         public static readonly ErrorCode UserNotFound = new("User not found", StatusCodes.Status404NotFound);
         public static readonly ErrorCode RoleNotFound = new("Role not found", StatusCodes.Status404NotFound);
         public static readonly ErrorCode UserAlreadyExists = new("User already exists", StatusCodes.Status409Conflict);
