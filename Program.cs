@@ -145,6 +145,8 @@ builder.Services.AddScoped<RoleRepository>();
 builder.Services.AddScoped<AuthenticationService>();
 builder.Services.AddScoped<FriendshipService>();
 builder.Services.AddScoped<FriendshipRepository>();
+builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<NotificationRepository>();
 
 // Cors
 builder.Services.AddCors(options =>

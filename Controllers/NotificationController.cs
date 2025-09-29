@@ -28,5 +28,15 @@ namespace ChatAppApi.Controllers
             ApiResponse<List<NotificationResponse>> apiResponse = await _notifService.GetLatestNotificationsAsync(userId, quantity);
             return Ok(apiResponse);
         }
+
+        [HttpPost("maskAsRead")]
+        [Authorize]
+        [Authorize(Policy = "ROLE_USER")]
+        public async Task<IActionResult> MaskAsRead()
+        {
+            string userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "";
+            ApiResponse<object> apiResponse = await _notifService.MaskReadForUnreadNotificationsAsync(userId);
+            return Ok(apiResponse);
+        }
     }
 }

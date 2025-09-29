@@ -29,10 +29,11 @@ namespace ChatAppApi.Services
             return ApiResponse<List<NotificationResponse>>.CreateSuccess(responses);
         }
 
-        public async Task MaskReadForUnreadNotificationsAsync(string userId)
+        public async Task<ApiResponse<object>> MaskReadForUnreadNotificationsAsync(string userId)
         {
             User user = await _userRepo.FindByIdAsync(userId) ?? throw new AppException(ErrorCode.UserNotFound);
             await _notifRepo.UpdateReadForUnreadNotificationsByUserAsync(user);
+            return ApiResponse<object>.CreateSuccess(null);
         }
     }
 }

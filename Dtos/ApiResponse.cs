@@ -12,7 +12,7 @@ namespace ChatAppApi.Dtos
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public T? Data { get; set; }
 
-        public static ApiResponse<T> CreateSuccess(T data, string? message = null)
+        public static ApiResponse<T> CreateSuccess(T? data, string? message = null)
         {
             return new ApiResponse<T>
             {

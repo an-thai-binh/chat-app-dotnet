@@ -16,14 +16,16 @@ namespace ChatAppApi.Services
         private readonly IHubContext<ApplicationHub> _hubContext;
         private readonly FriendshipRepository _fsRepo;
         private readonly UserRepository _userRepo;
+        private readonly NotificationRepository _notifRepo;
 
-        public FriendshipService(ILogger<FriendshipService> logger, IMapper mapper, IHubContext<ApplicationHub> hubContext, FriendshipRepository fsRepo, UserRepository userRepo)
+        public FriendshipService(ILogger<FriendshipService> logger, IMapper mapper, IHubContext<ApplicationHub> hubContext, FriendshipRepository fsRepo, UserRepository userRepo, NotificationRepository notifRepo)
         {
             _logger = logger;
             _mapper = mapper;
             _hubContext = hubContext;
             _fsRepo = fsRepo;
             _userRepo = userRepo;
+            _notifRepo = notifRepo;
         }
 
         public async Task<ApiResponse<List<FriendRequestResponse>>> GetFriendRequestsAsync(string userId)
@@ -108,8 +110,39 @@ namespace ChatAppApi.Services
                 return;
             }
             await _fsRepo.UpdateStatus(friendship, "FRIEND");
-            await _hubContext.Clients.User(fromId).SendAsync("AcceptFriendRequest", receiver);
-            await _hubContext.Clients.User(toId).SendAsync("AcceptFriendRequestStatus", true);
+            // push notification
+            Notification notification = new()
+            {
+                User = sender,
+                Content = "<p><b>" + receiver.Username + "</b> has accepted your friend request</p>",
+                IsRead = false,
+                CreatedAt = DateTime.Now
+            };
+            notification = await _notifRepo.SaveAsync(notification);
+            NotificationResponse notificationResponse = _mapper.Map<NotificationResponse>(notification);
+            // send hub message
+            await _hubContext.Clients.User(fromId).SendAsync("AcceptFriendRequest", notificationResponse);
+            await _hubContext.Clients.User(toId).SendAsync("AcceptFriendRequestStatus", fromId);
+        }
+
+        public async Task DeclineFriendRequestAsync(string fromId, string toId)
+        {
+            if (fromId == toId) throw new AppException(ErrorCode.SelfActionNotAllowed);
+            User? sender = await _userRepo.FindByIdAsync(fromId);
+            if (sender == null)
+            {
+                _logger.LogWarning("AcceptFriendRequest Failed: Sender not found");
+                return;
+            }
+            User? receiver = await _userRepo.FindByIdAsync(toId);
+            if (receiver == null)
+            {
+                _logger.LogWarning("AcceptFriendRequest Failed: Receiver not found");
+                return;
+            }
+            await _fsRepo.DeleteByUserAndFriendAsync(sender, receiver);
+            // send hub message
+            await _hubContext.Clients.User(toId).SendAsync("DeclineFriendRequestStatus", fromId);
         }
     }
 }

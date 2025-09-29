@@ -25,7 +25,6 @@ namespace ChatAppApi.Hubs
         [Authorize(Policy = "ROLE_USER")]
         public async Task CancelFriendRequest(string toId)
         {
-            Console.WriteLine("Hello");
             await _fsService.CancelFriendRequestAsync(Context.UserIdentifier ?? "", toId);
         }
 
@@ -34,6 +33,13 @@ namespace ChatAppApi.Hubs
         public async Task AcceptFriendRequest(string fromId)
         {
             await _fsService.AcceptFriendRequestAsync(fromId, Context.UserIdentifier ?? "");
+        }
+
+        [Authorize]
+        [Authorize(Policy = "ROLE_USER")]
+        public async Task DeclineFriendRequest(string fromId)
+        {
+            await _fsService.DeclineFriendRequestAsync(fromId, Context.UserIdentifier ?? "");
         }
 
         [Authorize]
