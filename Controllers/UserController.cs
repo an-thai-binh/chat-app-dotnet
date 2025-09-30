@@ -40,6 +40,14 @@ namespace ChatAppApi.Controllers
             return Ok(apiResponse);
         }
 
+        [HttpGet("profile/{id}")]
+        [Authorize(Policy = "ADMIN_OR_OWNER")]
+        public async Task<IActionResult> ShowProfile(string id)
+        {
+            ApiResponse<UserProfileResponse> apiResponse = await _userService.ShowProfileAsync(id);
+            return Ok(apiResponse);
+        }
+
         /// <summary>
         /// Tìm kiếm người dùng trong chế độ bạn bè
         /// </summary>
@@ -53,6 +61,8 @@ namespace ChatAppApi.Controllers
             ApiResponse<UserFriendSearchResponse> apiResponse = await _userService.SearchUserInFriendAsync(userId, query);
             return Ok(apiResponse);
         }
+
+        
 
         // POST api/<UserController>
         [HttpPost]

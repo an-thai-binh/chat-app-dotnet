@@ -11,6 +11,7 @@ namespace ChatAppApi.Profiles
         {
             CreateMap<UserCreationRequest, User>();
             CreateMap<User, UserResponse>();
+            CreateMap<User, UserProfileResponse>();
         }
     }
 }

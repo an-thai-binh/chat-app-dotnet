@@ -48,6 +48,13 @@ namespace ChatAppApi.Services
             return ApiResponse<UserResponse>.CreateSuccess(userResponse);
         }
 
+        public async Task<ApiResponse<UserProfileResponse>> ShowProfileAsync(string id)
+        {
+            User user = await _userRepo.FindByIdAsync(id) ?? throw new AppException(ErrorCode.UserNotFound);
+            UserProfileResponse userProfileResponse = _mapper.Map<UserProfileResponse>(user);
+            return ApiResponse<UserProfileResponse>.CreateSuccess(userProfileResponse);
+        }
+
         public async Task<ApiResponse<UserFriendSearchResponse>> SearchUserInFriendAsync(string userId, string query)
         {
             User user = await _userRepo.FindByIdAsync(userId) ?? throw new AppException(ErrorCode.UserNotFound);
@@ -102,7 +109,5 @@ namespace ChatAppApi.Services
             UserResponse userResponse = _mapper.Map<UserResponse>(createdUser);
             return ApiResponse<UserResponse>.CreateSuccess(userResponse);
         }
-
-      
     }
 }
