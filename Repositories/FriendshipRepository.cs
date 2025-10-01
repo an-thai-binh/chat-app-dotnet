@@ -22,12 +22,21 @@ namespace ChatAppApi.Repositories
                                                                    || (f.User == receiver && f.Friend == sender));
         }
 
-        public async Task<List<Friendship>> FindFriendRequestByUser(User user)
+        public async Task<List<Friendship>> FindFriendRequestByUserAsync(User user)
         {
             return await _context.Friendship
                 .Include(f => f.User)
                 .Include(f => f.Friend)
                 .Where(f => f.Friend == user && f.Status == "PENDING")
+                .ToListAsync();
+        }
+
+        public async Task<List<Friendship>> FindByUserAsync(User user)
+        {
+            return await _context.Friendship
+                .Include(f => f.User)
+                .Include(f => f.Friend)
+                .Where(f => f.User == user || f.Friend == user)
                 .ToListAsync();
         }
 

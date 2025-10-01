@@ -31,10 +31,32 @@ namespace ChatAppApi.Services
         public async Task<ApiResponse<List<FriendRequestResponse>>> GetFriendRequestsAsync(string userId)
         {
             User user = await _userRepo.FindByIdAsync(userId) ?? throw new AppException(ErrorCode.UserNotFound);
-            List<Friendship> friendships = await _fsRepo.FindFriendRequestByUser(user);
+            List<Friendship> friendships = await _fsRepo.FindFriendRequestByUserAsync(user);
             List<FriendRequestResponse> responses = _mapper.Map<List<FriendRequestResponse>>(friendships);
             return ApiResponse<List<FriendRequestResponse>>.CreateSuccess(responses);
-        } 
+        }
+
+        public async Task<ApiResponse<List<FriendResponse>>> GetUserFriends(string userId)
+        {
+            User user = await _userRepo.FindByIdAsync(userId) ?? throw new AppException(ErrorCode.UserNotFound);
+            List<Friendship> friendships = await _fsRepo.FindByUserAsync(user);
+            List<FriendResponse> friendResponses = new();
+            foreach(Friendship friendship in friendships)
+            {
+                FriendResponse friendResponse = new();
+                if(friendship.User.Id.ToString() == userId) // xác định xem user là người gửi hay người nhận request để lấy ra friend cho đúng
+                {
+                    friendResponse.Id = friendship.Friend.Id;
+                    friendResponse.Username = friendship.Friend.Username;
+                } else 
+                {
+                    friendResponse.Id = friendship.User.Id;
+                    friendResponse.Username = friendship.User.Username;
+                }
+                friendResponses.Add(friendResponse);
+            }
+            return ApiResponse<List<FriendResponse>>.CreateSuccess(friendResponses);
+        }
 
         public async Task SendFriendRequestAsync(string fromId, string toId)
         {

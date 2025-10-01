@@ -28,5 +28,14 @@ namespace ChatAppApi.Controllers
             ApiResponse<List<FriendRequestResponse>> apiResponse = await _fsService.GetFriendRequestsAsync(userId);
             return Ok(apiResponse);
         }
+
+        [HttpGet("userFriends/{id}")]
+        [Authorize]
+        [Authorize(Policy = "ADMIN_OR_OWNER")]
+        public async Task<IActionResult> IndexUserFriends(string id)
+        {
+            ApiResponse<List<FriendResponse>> apiResponse = await _fsService.GetUserFriends(id);
+            return Ok(apiResponse);
+        }
     }
 }
