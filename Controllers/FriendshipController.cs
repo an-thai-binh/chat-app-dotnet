@@ -37,5 +37,14 @@ namespace ChatAppApi.Controllers
             ApiResponse<List<FriendResponse>> apiResponse = await _fsService.GetUserFriends(id);
             return Ok(apiResponse);
         }
+
+        [HttpDelete("{id}")]
+        [Authorize]
+        [Authorize(Policy = "ADMIN_OR_OWNER")]
+        public async Task<IActionResult> DeleteFriendship(string id, [FromQuery] string friendId)
+        {
+            ApiResponse<object> apiResponse = await _fsService.DeleteFriendshipAsync(id, friendId);
+            return Ok(apiResponse);
+        }
     }
 }

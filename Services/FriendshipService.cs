@@ -166,5 +166,13 @@ namespace ChatAppApi.Services
             // send hub message
             await _hubContext.Clients.User(toId).SendAsync("DeclineFriendRequestStatus", fromId);
         }
+
+        public async Task<ApiResponse<object>> DeleteFriendshipAsync(string userId, string friendId)
+        {
+            User user = await _userRepo.FindByIdAsync(userId) ?? throw new AppException(ErrorCode.UserNotFound);
+            User friend = await _userRepo.FindByIdAsync(friendId) ?? throw new AppException(ErrorCode.UserNotFound);
+            await _fsRepo.DeleteFriendshipAsync(user, friend);
+            return ApiResponse<object>.CreateSuccess(null);
+        }
     }
 }
