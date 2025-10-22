@@ -18,5 +18,15 @@ namespace ChatAppApi.Models
         public List<Friendship> FriendReceived { get; set; } = new();
         [JsonIgnore]
         public List<Notification> Notifications { get; set; } = new();
+        [JsonIgnore]
+        public List<Conversation> GroupConversations { get; set; } = new();
+        [JsonIgnore]
+        public List<ConversationParticipant> Participations { get; set; } = new();
+        [JsonIgnore]
+        public List<Message> Messages { get; set; } = new();
+        [JsonIgnore]
+        public List<MessageSeen> MessageSeens { get; set; } = new();
+        [JsonIgnore]
+        public List<UserConversation> UserConversations { get; set; } = new();
     } 
 }

@@ -4,6 +4,7 @@ using ChatAppApi.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChatAppApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251022165258_AddConversation")]
+    partial class AddConversation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -50,32 +53,6 @@ namespace ChatAppApi.Migrations
                     b.ToTable("Conversation");
                 });
 
-            modelBuilder.Entity("ChatAppApi.Models.ConversationParticipant", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("ConversationId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("JoinedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ConversationId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ConversationParticipant");
-                });
-
             modelBuilder.Entity("ChatAppApi.Models.Friendship", b =>
                 {
                     b.Property<long>("Id")
@@ -105,67 +82,6 @@ namespace ChatAppApi.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Friendship");
-                });
-
-            modelBuilder.Entity("ChatAppApi.Models.Message", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("ConversationId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("varchar(50)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ConversationId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Message");
-                });
-
-            modelBuilder.Entity("ChatAppApi.Models.MessageSeen", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("MessageId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("SeenAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MessageId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("MessageSeen");
                 });
 
             modelBuilder.Entity("ChatAppApi.Models.Notification", b =>
@@ -272,43 +188,6 @@ namespace ChatAppApi.Migrations
                     b.ToTable("User");
                 });
 
-            modelBuilder.Entity("ChatAppApi.Models.UserConversation", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<long>("Id"));
-
-                    b.Property<long>("ConversationId")
-                        .HasColumnType("bigint");
-
-                    b.Property<bool>("IsPinned")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<long>("LatestMessageId")
-                        .HasColumnType("bigint");
-
-                    b.Property<DateTime>("LatestMessageTime")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<int>("UnreadCount")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("char(36)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ConversationId");
-
-                    b.HasIndex("LatestMessageId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserConversation");
-                });
-
             modelBuilder.Entity("PermissionRole", b =>
                 {
                     b.Property<long>("PermissionsId")
@@ -350,25 +229,6 @@ namespace ChatAppApi.Migrations
                     b.Navigation("GroupCreator");
                 });
 
-            modelBuilder.Entity("ChatAppApi.Models.ConversationParticipant", b =>
-                {
-                    b.HasOne("ChatAppApi.Models.Conversation", "Conversation")
-                        .WithMany("Participants")
-                        .HasForeignKey("ConversationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ChatAppApi.Models.User", "User")
-                        .WithMany("Participations")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Conversation");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("ChatAppApi.Models.Friendship", b =>
                 {
                     b.HasOne("ChatAppApi.Models.User", "Friend")
@@ -388,44 +248,6 @@ namespace ChatAppApi.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("ChatAppApi.Models.Message", b =>
-                {
-                    b.HasOne("ChatAppApi.Models.Conversation", "Conversation")
-                        .WithMany("Messages")
-                        .HasForeignKey("ConversationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ChatAppApi.Models.User", "User")
-                        .WithMany("Messages")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Conversation");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ChatAppApi.Models.MessageSeen", b =>
-                {
-                    b.HasOne("ChatAppApi.Models.Message", "Message")
-                        .WithMany("MessageSeens")
-                        .HasForeignKey("MessageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ChatAppApi.Models.User", "User")
-                        .WithMany("MessageSeens")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Message");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("ChatAppApi.Models.Notification", b =>
                 {
                     b.HasOne("ChatAppApi.Models.User", "User")
@@ -433,33 +255,6 @@ namespace ChatAppApi.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ChatAppApi.Models.UserConversation", b =>
-                {
-                    b.HasOne("ChatAppApi.Models.Conversation", "Conversation")
-                        .WithMany("UserConversations")
-                        .HasForeignKey("ConversationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ChatAppApi.Models.Message", "LatestMessage")
-                        .WithMany("UserConversations")
-                        .HasForeignKey("LatestMessageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ChatAppApi.Models.User", "User")
-                        .WithMany("UserConversations")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Conversation");
-
-                    b.Navigation("LatestMessage");
 
                     b.Navigation("User");
                 });
@@ -494,22 +289,6 @@ namespace ChatAppApi.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("ChatAppApi.Models.Conversation", b =>
-                {
-                    b.Navigation("Messages");
-
-                    b.Navigation("Participants");
-
-                    b.Navigation("UserConversations");
-                });
-
-            modelBuilder.Entity("ChatAppApi.Models.Message", b =>
-                {
-                    b.Navigation("MessageSeens");
-
-                    b.Navigation("UserConversations");
-                });
-
             modelBuilder.Entity("ChatAppApi.Models.User", b =>
                 {
                     b.Navigation("FriendReceived");
@@ -518,15 +297,7 @@ namespace ChatAppApi.Migrations
 
                     b.Navigation("GroupConversations");
 
-                    b.Navigation("MessageSeens");
-
-                    b.Navigation("Messages");
-
                     b.Navigation("Notifications");
-
-                    b.Navigation("Participations");
-
-                    b.Navigation("UserConversations");
                 });
 #pragma warning restore 612, 618
         }
