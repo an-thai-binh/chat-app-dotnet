@@ -14,14 +14,18 @@ namespace ChatAppApi.Models.Configurations
 
             builder.HasOne(o => o.User)
                 .WithMany(u => u.FriendSent)
-                .HasForeignKey("UserId");
+                .HasForeignKey(o => o.UserId);
 
             builder.HasOne(o => o.Friend)
                 .WithMany(u => u.FriendReceived)
-                .HasForeignKey("FriendId");
+                .HasForeignKey(o => o.FriendId);
 
             builder.Property(o => o.Status)
                 .HasMaxLength(20);
+
+            builder.HasOne(o => o.PrivateConversation)
+                .WithOne(c => c.Friendship)
+                .HasForeignKey<Friendship>(o => o.PrivateConversationId);
         }
     }
 }

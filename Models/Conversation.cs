@@ -7,8 +7,11 @@ namespace ChatAppApi.Models
         public long Id { get; set; }
         public bool IsGroup { get; set; }
         public string GroupName { get; set; } = default!;
-        public User GroupCreator { get; set; } = default!;
+        public User? GroupCreator { get; set; }
+        public Guid? GroupCreatorId { get; set; }
         public DateTime CreatedAt { get; set; }
+        [JsonIgnore]
+        public Friendship Friendship { get; set; } = default!;
         [JsonIgnore]
         public List<ConversationParticipant> Participants { get; set; } = new();
         [JsonIgnore]

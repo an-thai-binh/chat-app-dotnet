@@ -8,7 +8,9 @@ namespace ChatAppApi.Models
     {
         public long Id { get; set; }
         public Conversation Conversation { get; set; } = default!;
+        public long ConversationId { get; set; }
         public User User { get; set; } = default!;
+        public Guid UserId { get; set; }
         public string Content { get; set; } = default!;
         public string Type { get; set; } = default!;
         public DateTime CreatedAt { get; set; }

@@ -4,6 +4,7 @@
     {
         public long Id { get; set; }
         public User User { get; set; } = default!;
+        public Guid UserId { get; set; }
         public string Content { get; set; } = default!;
         public bool IsRead { get; set; }
         public DateTime CreatedAt { get; set; }

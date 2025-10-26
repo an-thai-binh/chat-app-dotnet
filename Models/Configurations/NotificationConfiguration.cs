@@ -14,7 +14,7 @@ namespace ChatAppApi.Models.Configurations
 
             builder.HasOne(n => n.User)
                 .WithMany(u => u.Notifications)
-                .HasForeignKey("UserId");
+                .HasForeignKey(n => n.UserId);
 
             builder.Property(o => o.Content)
                 .HasMaxLength(500);

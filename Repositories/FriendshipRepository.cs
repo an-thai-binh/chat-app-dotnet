@@ -22,6 +22,13 @@ namespace ChatAppApi.Repositories
                                                                    || (f.User == receiver && f.Friend == sender));
         }
 
+        public async Task<Friendship?> FindByUserAndFriendWithConversationAsync(User sender, User receiver)
+        {
+            return await _context.Friendship.Include(f => f.PrivateConversation)
+                .FirstOrDefaultAsync(f => (f.User == sender && f.Friend == receiver)
+                || (f.User == receiver && f.Friend == sender));
+        }
+
         public async Task<List<Friendship>> FindFriendRequestByUserAsync(User user)
         {
             return await _context.Friendship
@@ -73,6 +80,12 @@ namespace ChatAppApi.Repositories
                 _context.Friendship.Remove(friendship);
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task UpdateAsync(Friendship friendship)
+        {
+            _context.Friendship.Update(friendship);
+            await _context.SaveChangesAsync();
         }
     }
 }

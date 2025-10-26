@@ -15,6 +15,11 @@ namespace ChatAppApi.Repositories
         public DbSet<Permission> Permission { get; set; }
         public DbSet<Friendship> Friendship { get; set; }
         public DbSet<Notification> Notification { get; set; }
+        public DbSet<Conversation> Conversation { get; set; }
+        public DbSet<ConversationParticipant> ConversationParticipant { get; set; }
+        public DbSet<Message> Message { get; set; }
+        public DbSet<MessageSeen> MessageSeen { get; set; }
+        public DbSet<UserConversation> UserConversation { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

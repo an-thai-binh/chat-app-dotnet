@@ -14,7 +14,7 @@ namespace ChatAppApi.Models.Configurations
 
             builder.HasOne(c => c.GroupCreator)
                 .WithMany(u => u.GroupConversations)
-                .HasForeignKey("GroupCreatorId");
+                .HasForeignKey(c => c.GroupCreatorId);
         }
     }
 }

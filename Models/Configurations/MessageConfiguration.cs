@@ -20,11 +20,11 @@ namespace ChatAppApi.Models.Configurations
 
             builder.HasOne(m => m.Conversation)
                 .WithMany(c => c.Messages)
-                .HasForeignKey("ConversationId");
+                .HasForeignKey(m => m.ConversationId);
 
             builder.HasOne(m => m.User)
                .WithMany(u => u.Messages)
-               .HasForeignKey("UserId");
+               .HasForeignKey(m => m.UserId);
         }
     }
 }
