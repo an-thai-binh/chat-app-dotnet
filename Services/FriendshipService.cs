@@ -5,6 +5,7 @@ using ChatAppApi.Exceptions;
 using ChatAppApi.Hubs;
 using ChatAppApi.Models;
 using ChatAppApi.Repositories;
+using ChatAppApi.Utils;
 using Microsoft.AspNetCore.SignalR;
 
 namespace ChatAppApi.Services
@@ -14,15 +15,17 @@ namespace ChatAppApi.Services
         private readonly ILogger<FriendshipService> _logger;
         private readonly IMapper _mapper;
         private readonly IHubContext<ApplicationHub> _hubContext;
+        private readonly Transactional _transactional;
         private readonly FriendshipRepository _fsRepo;
         private readonly UserRepository _userRepo;
         private readonly NotificationRepository _notifRepo;
 
-        public FriendshipService(ILogger<FriendshipService> logger, IMapper mapper, IHubContext<ApplicationHub> hubContext, FriendshipRepository fsRepo, UserRepository userRepo, NotificationRepository notifRepo)
+        public FriendshipService(ILogger<FriendshipService> logger, IMapper mapper, IHubContext<ApplicationHub> hubContext, Transactional transactional, FriendshipRepository fsRepo, UserRepository userRepo, NotificationRepository notifRepo)
         {
             _logger = logger;
             _mapper = mapper;
             _hubContext = hubContext;
+            _transactional = transactional;
             _fsRepo = fsRepo;
             _userRepo = userRepo;
             _notifRepo = notifRepo;
@@ -131,17 +134,22 @@ namespace ChatAppApi.Services
                 _logger.LogWarning("AccpetFriendRequest Failed: Both sender and receiver are friend");
                 return;
             }
-            await _fsRepo.UpdateStatus(friendship, "FRIEND");
-            // push notification
-            Notification notification = new()
+
+            NotificationResponse? notificationResponse = null;
+            await _transactional.RunAsync(async () =>
             {
-                User = sender,
-                Content = "<p><b>" + receiver.Username + "</b> has accepted your friend request</p>",
-                IsRead = false,
-                CreatedAt = DateTime.Now
-            };
-            notification = await _notifRepo.SaveAsync(notification);
-            NotificationResponse notificationResponse = _mapper.Map<NotificationResponse>(notification);
+                await _fsRepo.UpdateStatus(friendship, "FRIEND");
+                // push notification
+                Notification notification = new()
+                {
+                    User = sender,
+                    Content = "<p><b>" + receiver.Username + "</b> has accepted your friend request</p>",
+                    IsRead = false,
+                    CreatedAt = DateTime.Now
+                };
+                notification = await _notifRepo.SaveAsync(notification);
+                NotificationResponse notificationResponse = _mapper.Map<NotificationResponse>(notification);
+            });
             // send hub message
             await _hubContext.Clients.User(fromId).SendAsync("AcceptFriendRequest", notificationResponse);
             await _hubContext.Clients.User(toId).SendAsync("AcceptFriendRequestStatus", fromId);

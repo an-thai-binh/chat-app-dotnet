@@ -31,7 +31,7 @@ namespace ChatAppApi.Services
             User user = await _userRepo.FindByIdAsync(userId) ?? throw new AppException(ErrorCode.UserNotFound);
             User friend = await _userRepo.FindByIdAsync(friendId) ?? throw new AppException(ErrorCode.UserNotFound);
             Friendship? friendship = await _fsRepo.FindByUserAndFriendWithConversationAsync(user, friend);
-            if (friendship == null || friendship.Status == "FRIEND")
+            if (friendship == null || friendship.Status != "FRIEND")
             {
                 throw new AppException(ErrorCode.FriendshipNotFound);
             }
@@ -46,7 +46,7 @@ namespace ChatAppApi.Services
                         Id1 = userId,
                         Name1 = user.Username,
                         Id2 = friendId,
-                        Name2 = user.Username
+                        Name2 = friend.Username
                     };
                     conversation = new Conversation
                     {

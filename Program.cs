@@ -147,6 +147,8 @@ builder.Services.AddScoped<FriendshipService>();
 builder.Services.AddScoped<FriendshipRepository>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddScoped<NotificationRepository>();
+builder.Services.AddScoped<ConversationRepository>();
+builder.Services.AddScoped<ConversationService>();
 
 // Cors
 builder.Services.AddCors(options =>

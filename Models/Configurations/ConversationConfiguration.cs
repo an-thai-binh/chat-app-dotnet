@@ -12,9 +12,13 @@ namespace ChatAppApi.Models.Configurations
             builder.Property(n => n.Id)
                 .ValueGeneratedOnAdd();
 
+            builder.Property(n => n.GroupName)
+                .HasColumnType("JSON");
+
             builder.HasOne(c => c.GroupCreator)
                 .WithMany(u => u.GroupConversations)
-                .HasForeignKey(c => c.GroupCreatorId);
+                .HasForeignKey(c => c.GroupCreatorId)
+                .IsRequired(false);
         }
     }
 }
